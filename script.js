@@ -1,7 +1,7 @@
 const cards = Array.from(document.querySelectorAll('.card'))
 
 let hasFlippedCard = false, lockBoard = false
-let firstCard, secondCard
+let firstCard, secondCard, countCardsFlip = 0, countError = 0
 
 function flipCard() {
   if (lockBoard || firstCard === this) return
@@ -18,9 +18,6 @@ function flipCard() {
   checkForMatch()
 }
 
-cards.forEach(card => {
-  card.addEventListener('click', flipCard)
-})
 
 function checkForMatch() {
   if (firstCard.dataset.card === secondCard.dataset.card) {
@@ -34,25 +31,53 @@ function checkForMatch() {
 function disableCards() {
   firstCard.removeEventListener('click', flipCard)
   secondCard.removeEventListener('click', flipCard)
+  countCardsFlip += 2
+
+  if(countCardsFlip >= 12){
+    setTimeout(() => {
+      suffle()
+      countCardsFlip = 0
+      countError = 0
+    }, 1500)
+    alert('Win!')
+  }
+
   resetBoard()
 }
 
 function unflipCards() {
   lockBoard = true
+  countError++
   setTimeout(() => {
     firstCard.classList.remove('flip')
     secondCard.classList.remove('flip')
     resetBoard()
   }, 1500)
+
+  if(countError >= 5){
+    alert('Game Over!')
+    countError = 0
+    suffle()
+  }
 }
 
-function resetBoard(){
+function resetBoard() {
   lockBoard = false
   hasFlippedCard = false
   firstCard = null
   secondCard = null
 }
 
-(function (){
-  cards.forEach(card => card.style.order = Math.floor(Math.random() * 12))
-})()
+function suffle() {
+  cards.forEach(card => {
+    card.classList.remove('flip')
+    card.addEventListener('click', flipCard)
+  })
+  setTimeout(() => {
+    cards.forEach(card => {
+      card.style.order = 13
+      card.style.order = Math.floor(Math.random() * 12)
+    })
+  }, 1500)
+}
+(() => suffle())()
